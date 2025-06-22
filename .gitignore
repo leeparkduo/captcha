@@ -1,4 +1,7 @@
+# Dataset
 *.db
+cache/
+dataset/
 
 # General OS-level junk
 .DS_Store
