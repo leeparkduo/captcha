@@ -27,3 +27,13 @@ $ python -m venv .venv
 $ source .venv/bin/activate
 $ pip install -r requirements.txt
 ```
+### 데이터 다운로드
+```sh
+$ python download.py
+```
+
+### 서버 실행 및 접속
+```sh
+$ uvicorn app.main:app --reload
+```
+실행 이후 웹 브라우저에서 `http://localhost:8000`에 접속합니다.
