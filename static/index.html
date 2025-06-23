@@ -2,15 +2,25 @@
 <html lang="ko">
 <head>
     <meta charset="UTF-8"/>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
     <title>Biased-VLM CAPTCHA</title>
-    <link rel="stylesheet" href="style.css"/>
+    <link rel="stylesheet" href="static/style.css" />
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.7/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-LN+7fdVzj6u52u30Kp6M/trliBMCMKTyK833zpbD+pXdCLuTusPj697FH4R/5mcr" crossorigin="anonymous">
 </head>
-<body>
-    <h2 id="question"></h2>
-    <canvas id="canvas" width="640" height="480"></canvas>
-    <br>
-    <button id="submit">제출</button>
-    <p id="status"></p>
-    <script src="script.js"></script>
+<body class="bg-light">
+    <div class="container min-vh-100 d-flex flex-column justify-content-center align-items-center">
+        <div class="card p-4" style="max-width: 720px; width: 100%;">
+            <div class="card-body d-flex flex-column align-items-center">
+                <h2 id="question" class="card-title text-center mb-4"></h2>
+                <canvas id="canvas" width="640" height="480" class="border rounded mb-4"></canvas>
+                <input type="text" id="userInput" class="form-control mb-3" placeholder="정답을 입력하세요" autocomplete="off" />
+                <button id="submit" class="btn btn-primary w-100 mb-3">제출</button>
+                <p id="status" class="text-center text-danger"></p>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.7/dist/js/bootstrap.bundle.min.js" integrity="sha384-ndDqU0Gzau9qJ1lfW4pNLlhNTkCfHzAVBReH9diLvGRem5+R9g2FzA8ZGN954O5Q" crossorigin="anonymous"></script>
+    <script src="static/script.js"></script>
 </body>
 </html>

@@ -38,7 +38,8 @@ function getPos(e){
 }
 
 function draw(){
-  ctx.drawImage(img,0,0);
+  ctx.clearRect(0, 0, canvas.width, canvas.height);
+  ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
   ctx.strokeStyle="red"; ctx.lineWidth=2;
 
   boxes.forEach(b=>{
@@ -48,20 +49,20 @@ function draw(){
 
 async function newTask(){
   boxes = [];
-  const res = await fetch("/captcha").then(r=>r.json());
+  const res = await fetch("/problem").then(r=>r.json());
 
   taskId = res.id;
 
-  document.getElementById("question").innerText=res.question;
+  document.getElementById("question").innerText=res.prompt;
   
-  img.src = res.image_url;
+  img.src = "data:image/png;base64," + res.image_base64;
   img.onload=draw;
 }
 
 async function submit(){
   const body = { masks:boxes };
 
-  const response = await fetch(`/captcha/${taskId}/answer`,{
+  const response = await fetch(`/problem/${taskId}/answer`,{
     method:"POST",
     headers:{'Content-Type':'application/json'},
     body:JSON.stringify(body)
