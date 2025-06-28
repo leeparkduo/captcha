@@ -153,7 +153,7 @@ def create_answer(
 
         # --- 폰트 크기 동적 조정 ---
         try:
-            font = ImageFont.truetype("Roboto-Medium.ttf", size=20)
+            font = ImageFont.truetype("NotoSansSunuwar-Regular.ttf", size=20)
         except:
             font = ImageFont.load_default()
 
@@ -162,7 +162,7 @@ def create_answer(
         text_w = bbox[2] - bbox[0]
         text_h = bbox[3] - bbox[1]
         draw.text(
-            (center_x - text_w / 2, center_y - text_h / 2 - 5),
+            (center_x - text_w / 2, center_y - text_h / 2 - 6),
             number,
             fill="white",
             font=font
