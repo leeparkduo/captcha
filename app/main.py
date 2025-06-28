@@ -110,8 +110,7 @@ def create_answer(
         ground_truth=str(item.get("ground_truth", '')),
         expected_bias=str(item.get("expected_bias", '')),
         user_masks=request.user_masks,
-        user_answer=request.user_answer,
-        passed=False
+        user_answer=request.user_answer
     )
     db.add(task)
     db.commit()

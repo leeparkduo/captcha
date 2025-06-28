@@ -14,5 +14,4 @@ class Task(Base):
     expected_bias = Column(String, nullable=False)
     user_masks = Column(JSON, nullable=True)
     user_answer = Column(String, nullable=True)
-    passed = Column(Boolean, default=False)
     created_at = Column(DateTime, server_default=func.now())
