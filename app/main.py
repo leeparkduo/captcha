@@ -9,6 +9,7 @@ from typing import List, Dict
 
 from .models import Task
 from .database import Base, engine, get_db
+from PIL import Image, ImageDraw, ImageFont
 
 import uuid
 import random
@@ -115,5 +116,59 @@ def create_answer(
     db.add(task)
     db.commit()
     db.refresh(task)
+
+    gt_dir = os.path.join(DATASET_DIR, "ground_truth")
+    os.makedirs(gt_dir, exist_ok=True)
+    gt_path = os.path.join(gt_dir, f"{task.task_id}.png")
+    item["image"].save(gt_path, format="PNG")
+
+    # Save submitted image (draw user masks on a copy)
+    sub_dir = os.path.join(DATASET_DIR, "submitted")
+    os.makedirs(sub_dir, exist_ok=True)
+    sub_path = os.path.join(sub_dir, f"{task.task_id}.png")
+    submitted_img = item["image"].copy()
+    draw = ImageDraw.Draw(submitted_img)
+
+    for idx, mask in enumerate(request.user_masks):
+        x = mask.get("x", 0)
+        y = mask.get("y", 0)
+        width = mask.get("width", 0)
+        height = mask.get("height", 0)
+        center_x = x + width / 2
+        center_y = y + height / 2
+        number = str(idx + 1)
+
+        # --- 안티앨리어싱 원 그리기 ---
+        scale = 4  # 4배 크기로 그렸다가 줄임
+        large_overlay = Image.new("RGBA", (submitted_img.width * scale, submitted_img.height * scale), (0, 0, 0, 0))
+        large_draw = ImageDraw.Draw(large_overlay)
+        ellipse_color = (204, 0, 0, 178)
+        large_draw.ellipse(
+            [int(x*scale), int(y*scale), int((x+width)*scale), int((y+height)*scale)],
+            fill=ellipse_color
+        )
+        # 원본 크기로 리사이즈 (LANCZOS)
+        overlay = large_overlay.resize(submitted_img.size, Image.LANCZOS)
+        submitted_img = Image.alpha_composite(submitted_img.convert("RGBA"), overlay)
+
+        # --- 폰트 크기 동적 조정 ---
+        try:
+            font = ImageFont.truetype("Roboto-Medium.ttf", size=20)
+        except:
+            font = ImageFont.load_default()
+
+        draw = ImageDraw.Draw(submitted_img)
+        bbox = draw.textbbox((0, 0), number, font=font)
+        text_w = bbox[2] - bbox[0]
+        text_h = bbox[3] - bbox[1]
+        draw.text(
+            (center_x - text_w / 2, center_y - text_h / 2 - 5),
+            number,
+            fill="white",
+            font=font
+        )
+
+    submitted_img = submitted_img.convert("RGB")
+    submitted_img.save(sub_path, format="PNG")
 
     return JSONResponse(content={"message": "Answer submitted and task stored", "task_id": task.task_id})

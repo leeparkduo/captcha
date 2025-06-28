@@ -49,10 +49,10 @@ function draw(){
     const centerY = b.y + b.height / 2;
     const radius = Math.max(Math.abs(b.width), Math.abs(b.height)) / 2;
 
-    // Draw black filled circle
+    // Draw 20% darker red filled circle with 50% alpha
     ctx.beginPath();
     ctx.arc(centerX, centerY, radius, 0, 2 * Math.PI);
-    ctx.fillStyle = 'red';
+    ctx.fillStyle = 'rgba(204,0,0,0.7)';
     ctx.fill();
 
     // Draw white number centered in circle

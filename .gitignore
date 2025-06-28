@@ -2,6 +2,7 @@
 *.db
 cache/
 dataset/
+trainset/
 
 # General OS-level junk
 .DS_Store
