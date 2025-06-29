@@ -32,6 +32,8 @@ window.onload=async ()=>{
 
   document.getElementById("submit").onclick=submit;
 
+  document.getElementById("ignore").onclick = ignore;
+
   document.getElementById("download").onclick = function() {
     window.location.href = "/download";
   };
@@ -127,6 +129,29 @@ async function submit() {
     document.getElementById("status").innerText = "✅ 답안 제출 완료 (task_id: " + response.task_id + ")";
   } else {
     document.getElementById("status").innerText = "❌ 제출 실패";
+  }
+
+  await newTask();
+}
+
+async function ignore() {
+  const body = {
+    topic: topic,
+    index: index,
+    user_masks: boxes,
+    user_answer: document.getElementById("userInput").value
+  };
+
+  const response = await fetch("/ignore", {
+    method: "POST",
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(body)
+  }).then(r => r.json());
+
+  if (response.task_id) {
+    document.getElementById("status").innerText = "🚫 무시됨 (task_id: " + response.task_id + ")";
+  } else {
+    document.getElementById("status").innerText = "❌ 무시 실패";
   }
 
   await newTask();

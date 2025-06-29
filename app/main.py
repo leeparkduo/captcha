@@ -122,6 +122,7 @@ def create_answer(
         image_height=image_height,
         ground_truth=str(item.get("ground_truth", '')),
         expected_bias=str(item.get("expected_bias", '')),
+        included=True,
         user_masks=request.user_masks,
         user_answer=request.user_answer
     )
@@ -185,6 +186,38 @@ def create_answer(
 
     return JSONResponse(content={"message": "Answer submitted and task stored", "task_id": task.task_id})
 
+@app.post("/ignore")
+def ignore_task(
+        request: AnswerRequest,
+        db: Session = Depends(get_db)):
+
+    # Task를 새로 생성하여 답변과 함께 저장
+    dataset = problem_set[request.topic][request.topic]
+    index = request.index
+    if index < 0 or index >= len(dataset):
+        raise HTTPException(status_code=404, detail="문제 인덱스 오류")
+    item = dataset[index]
+    image_width, image_height = item["image"].size
+
+    task = Task(
+        task_id=str(uuid.uuid4()),
+        topic=request.topic,
+        topic_data_idx=index,
+        prompt=item['prompt'],
+        image_width=image_width,
+        image_height=image_height,
+        ground_truth=str(item.get("ground_truth", '')),
+        expected_bias=str(item.get("expected_bias", '')),
+        included=False,
+        user_masks=request.user_masks,
+        user_answer=request.user_answer
+    )
+    db.add(task)
+    db.commit()
+    db.refresh(task)
+
+    return JSONResponse(content={"message": "Answer ignored", "task_id": task.task_id})
+
 @app.get("/download")
 def download_dataset_zip():
     """
@@ -194,7 +227,7 @@ def download_dataset_zip():
     OUTPUT_JSON = os.path.join(DATASET_DIR, "dataset.json")
 
     db = next(get_db())
-    tasks = db.query(Task).all()
+    tasks = db.query(Task).filter(Task.included == True).all()
     result = []
     for task in tasks:
         gt_path = os.path.join("data", "ground_truth", f"{task.task_id}.png")
