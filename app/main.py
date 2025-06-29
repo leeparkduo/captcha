@@ -33,6 +33,10 @@ problem_set = {'train': load_dataset("parquet", data_files={"train": "./dataset/
                'withtitle': load_dataset("parquet", data_files={"withtitle": "./dataset/data/withtitle-*.parquet"}),
                'yes_no': load_dataset("parquet", data_files={"yes_no": "./dataset/data/yes_no-*.parquet"})}
 
+def get_problem_item(topic, idx):
+    dataset = load_dataset("parquet", data_files={topic: f"./dataset/data/{topic}-*.parquet"}, split=topic)
+    return dataset[idx]
+
 # Construct FastAPI app and database
 Base.metadata.create_all(bind=engine)
 app = FastAPI()
@@ -207,7 +211,7 @@ def download_dataset_zip():
 
     with open(OUTPUT_JSON, "w", encoding="utf-8") as f:
         json.dump(result, f, ensure_ascii=False, indent=2)
-        
+
     zip_filename = "dataset.zip"
     temp_dir = tempfile.mkdtemp()
     zip_path = os.path.join(temp_dir, zip_filename)
