@@ -104,6 +104,9 @@ async function newTask(){
 }
 
 async function submit() {
+  const submitBtn = document.getElementById("submit");
+  submitBtn.disabled = true; // 버튼 비활성화
+
   // input 값 가져오기
   const userAnswer = document.getElementById("userInput").value;
 
@@ -132,6 +135,7 @@ async function submit() {
   }
 
   await newTask();
+  submitBtn.disabled = false; // 버튼 다시 활성화
 }
 
 async function ignore() {
