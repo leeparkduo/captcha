@@ -207,10 +207,7 @@ def download_dataset_zip():
 
     with open(OUTPUT_JSON, "w", encoding="utf-8") as f:
         json.dump(result, f, ensure_ascii=False, indent=2)
-
-    print(result)
-    print(OUTPUT_JSON)
-
+        
     zip_filename = "dataset.zip"
     temp_dir = tempfile.mkdtemp()
     zip_path = os.path.join(temp_dir, zip_filename)

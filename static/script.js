@@ -31,6 +31,21 @@ window.onload=async ()=>{
   });
 
   document.getElementById("submit").onclick=submit;
+
+  document.getElementById("download").onclick = function() {
+    window.location.href = "/download";
+  };
+
+  // Handle Ctrl+Z or Cmd+Z to undo the last box
+  window.addEventListener("keydown", function(e) {
+    if ((e.ctrlKey || e.metaKey) && e.key === "z") {
+      if (boxes.length > 0) {
+        boxes.pop();
+        draw();
+        e.preventDefault();
+      }
+    }
+  });
 }
 
 function getPos(e){
