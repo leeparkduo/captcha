@@ -91,6 +91,8 @@ async function newTask(){
   document.getElementById("question").innerText=res.prompt;
   document.getElementById("userInput").value = res.ground_truth || "";
 
+  document.getElementById("progress").innerText = `진행: ${res.solved_count} / ${res.total_count}`;
+
   img.src = "data:image/png;base64," + res.image_base64;
   img.onload = function() {
     canvas.height = img.height;

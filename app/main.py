@@ -79,6 +79,9 @@ def problem(db: Session = Depends(get_db)):
     img_base64 = base64.b64encode(buffered.getvalue()).decode('utf-8')
     image_width, image_height = img.size
 
+    total_count = sum(len(problem_set[t][t]) for t in TOPICS)
+    solved_count = len(existing_set)
+
     problem = {
         "topic": topic,
         "index": idx,
@@ -91,7 +94,9 @@ def problem(db: Session = Depends(get_db)):
         "expected_bias": item.get("expected_bias", ''),
         "image_width": image_width,
         "image_height": image_height,
-        "image_base64": img_base64
+        "image_base64": img_base64,
+        "total_count": total_count,
+        "solved_count": solved_count,
     }
     return JSONResponse(content=problem)
 
