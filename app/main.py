@@ -1,4 +1,5 @@
 from fastapi import FastAPI, Depends, HTTPException
+from fastapi import BackgroundTasks
 from fastapi.responses import FileResponse, StreamingResponse, JSONResponse
 from fastapi.staticfiles import StaticFiles
 from sqlalchemy.orm import Session
@@ -14,7 +15,10 @@ from PIL import Image, ImageDraw, ImageFont
 import uuid
 import random
 import base64
+import json
 import os
+import shutil
+import tempfile
 
 DATASET_DIR = os.environ.get("DATASET_DIR", "./trainset/data")
 
@@ -116,13 +120,13 @@ def create_answer(
     db.commit()
     db.refresh(task)
 
-    gt_dir = os.path.join(DATASET_DIR, "ground_truth")
+    gt_dir = os.path.join(DATASET_DIR, "data", "ground_truth")
     os.makedirs(gt_dir, exist_ok=True)
     gt_path = os.path.join(gt_dir, f"{task.task_id}.png")
     item["image"].save(gt_path, format="PNG")
 
     # Save submitted image (draw user masks on a copy)
-    sub_dir = os.path.join(DATASET_DIR, "submitted")
+    sub_dir = os.path.join(DATASET_DIR, "data", "submitted")
     os.makedirs(sub_dir, exist_ok=True)
     sub_path = os.path.join(sub_dir, f"{task.task_id}.png")
     submitted_img = item["image"].copy()
@@ -171,3 +175,48 @@ def create_answer(
     submitted_img.save(sub_path, format="PNG")
 
     return JSONResponse(content={"message": "Answer submitted and task stored", "task_id": task.task_id})
+
+@app.get("/download")
+def download_dataset_zip():
+    """
+    Packages the entire DATASET_DIR folder into a zip file and downloads it.
+    """
+
+    OUTPUT_JSON = os.path.join(DATASET_DIR, "dataset.json")
+
+    db = next(get_db())
+    tasks = db.query(Task).all()
+    result = []
+    for task in tasks:
+        gt_path = os.path.join("data", "ground_truth", f"{task.task_id}.png")
+        submitted_path = os.path.join("data", "submitted", f"{task.task_id}.png")
+        result.append({
+            "task_id": task.task_id,
+            "topic": task.topic,
+            "topic_data_idx": task.topic_data_idx,
+            "prompt": task.prompt,
+            "image_width": task.image_width,
+            "image_height": task.image_height,
+            "ground_truth": task.ground_truth,
+            "expected_bias": task.expected_bias,
+            "user_masks": task.user_masks,
+            "user_answer": task.user_answer,
+            "gt_path": gt_path,
+            "submitted_path": submitted_path
+        })
+
+    with open(OUTPUT_JSON, "w", encoding="utf-8") as f:
+        json.dump(result, f, ensure_ascii=False, indent=2)
+
+    print(result)
+    print(OUTPUT_JSON)
+
+    zip_filename = "dataset.zip"
+    temp_dir = tempfile.mkdtemp()
+    zip_path = os.path.join(temp_dir, zip_filename)
+    shutil.make_archive(
+        base_name=zip_path[:-4], 
+        format='zip', 
+        root_dir = os.path.dirname(DATASET_DIR), 
+        base_dir = os.path.basename(DATASET_DIR))
+    return FileResponse(zip_path, filename=zip_filename, media_type="application/zip")
